@@ -1,4 +1,4 @@
-module Mongo
+module github.com/CFCEN/Mongo
 
 go 1.19
 
