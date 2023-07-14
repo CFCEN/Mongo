@@ -87,11 +87,17 @@ func (mongoTemplate *MongoTemplate) UpdateOneById(ctx context.Context, id string
 }
 
 func (mongoTemplate *MongoTemplate) UpdateOne(ctx context.Context, criteria bson.M, update bson.M) int64 {
-	updateResult, _ := mongoTemplate.collection.UpdateOne(ctx, criteria, update)
+	updateResult, err := mongoTemplate.collection.UpdateOne(ctx, criteria, update)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return updateResult.ModifiedCount
 }
 
 func (mongoTemplate *MongoTemplate) UpdateMany(ctx context.Context, criteria bson.M, update bson.M) int64 {
-	updateResult, _ := mongoTemplate.collection.UpdateMany(ctx, criteria, update)
+	updateResult, err := mongoTemplate.collection.UpdateMany(ctx, criteria, update)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return updateResult.ModifiedCount
 }

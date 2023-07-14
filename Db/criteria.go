@@ -9,6 +9,10 @@ type Criteria struct {
 	sql map[string]interface{}
 }
 
+type UpdateSet struct {
+	update map[string]interface{}
+}
+
 func Where(key string, value interface{}) *Criteria {
 	criteria := Criteria{}
 	criteria.sql = make(map[string]interface{})
@@ -167,8 +171,29 @@ func (criteria *Criteria) IsNotEmpty(key string) Criteria {
 	return *criteria
 }
 
+func Update() *UpdateSet {
+	update := UpdateSet{}
+	update.update = make(map[string]interface{})
+	update.update["$set"] = make(map[string]interface{})
+	return &update
+}
+
+func (update *UpdateSet) Set(key string, value interface{}) UpdateSet {
+	update.update["$set"].(map[string]interface{})[key] = value
+	return *update
+}
+
+func (update *UpdateSet) Unset(key string) UpdateSet {
+	update.update["$unset"] = bson.M{key: ""}
+	return *update
+}
+
 func (criteria *Criteria) GetCriteria() bson.M {
 	return criteria.sql
+}
+
+func (update *UpdateSet) GetUpdate() bson.M {
+	return update.update
 }
 
 func ConvertStringToObjectId(id string) primitive.ObjectID {
