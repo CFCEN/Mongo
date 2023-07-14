@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"reflect"
 )
 
 type MongoTemplate struct {
@@ -45,7 +46,7 @@ func (mongoTemplate *MongoTemplate) DeleteMany(ctx context.Context, criteria bso
 }
 
 // FindOneById When using, _id must belong to primitive.ObjectID, if _id belongs to other types, please use your method
-func (mongoTemplate *MongoTemplate) FindOneById(ctx context.Context, id string, T interface{}) *mongo.SingleResult {
+func (mongoTemplate *MongoTemplate) FindOneById(ctx context.Context, id string, T interface{}) interface{} {
 	objectId, _ := primitive.ObjectIDFromHex(id)
 	criteria := bson.M{"_id": objectId}
 	return mongoTemplate.FindOne(ctx, criteria, T)
@@ -53,26 +54,28 @@ func (mongoTemplate *MongoTemplate) FindOneById(ctx context.Context, id string, 
 
 // FindOne T is the type of the value you want to get,will convert the value to T
 // if exist many value,return first value
-func (mongoTemplate *MongoTemplate) FindOne(ctx context.Context, criteria bson.M, T interface{}) *mongo.SingleResult {
+func (mongoTemplate *MongoTemplate) FindOne(ctx context.Context, criteria bson.M, T interface{}) interface{} {
 	singleResult := mongoTemplate.collection.FindOne(ctx, criteria)
 	err := singleResult.Decode(T)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return singleResult
+	return T
 }
 
 // FindMany if criteria := bson.M{} and opts == nil ,return all value,
 // criteria is query condition,opts is Data display mode{sort,limit.....}
-func (mongoTemplate *MongoTemplate) FindMany(ctx context.Context, criteria bson.M, T interface{}, opts ...*options.FindOptions) interface{} {
+func (mongoTemplate *MongoTemplate) FindMany(ctx context.Context, criteria bson.M, list interface{}, opts ...*options.FindOptions) interface{} {
 	cursor, _ := mongoTemplate.collection.Find(ctx, criteria, opts...)
-	list := make([]interface{}, 0)
+	listValue := reflect.ValueOf(list)
+	elemType := reflect.ValueOf(list).Elem().Type().Elem()
 	for cursor.Next(ctx) {
-		err := cursor.Decode(T)
+		elem := reflect.New(elemType).Interface()
+		err := cursor.Decode(elem)
 		if err != nil {
 			log.Fatal(err)
 		}
-		list = append(list, T)
+		listValue.Elem().Set(reflect.Append(listValue.Elem(), reflect.ValueOf(elem).Elem()))
 	}
 	return list
 }

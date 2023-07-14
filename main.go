@@ -21,13 +21,15 @@ func main() {
 
 	var ctx = context.TODO()
 	mongoTemplate := Db.Init("mongodb://root:admin@10.5.17.107:27017/?authMechanism=SCRAM-SHA-1&directConnection=true", "nezha_core", "users.settings")
-	var userSetting UserSetting
+	//var userSetting UserSetting
 	//mongoTemplate.FindOneById(ctx, "60595428721f2314cbbf6c65", &userSetting)
 
 	query := Db.Where("app", "nezha")
-
 	list := make([]UserSetting, 0)
-	mongoTemplate.FindMany(ctx, query.GetCriteria(), list, &userSetting)
+	mongoTemplate.FindMany(ctx, query.GetCriteria(), &list)
 
-	fmt.Println(userSetting)
+	for _, v := range list {
+		fmt.Println(v)
+	}
+
 }
