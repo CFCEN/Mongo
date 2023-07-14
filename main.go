@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Mongo/Db"
 	"context"
+	"github.com/CFCEN/Mongo/Db"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -19,9 +19,12 @@ type UserSetting struct {
 func main() {
 
 	var ctx = context.TODO()
-	mongoTemplate := Db.Init("", "nezha_core", "users.settings")
-	query := Db.Where("app", "nezha_core")
-	update := Db.Update().Set("app", "nezha")
-	mongoTemplate.UpdateMany(ctx, query.GetCriteria(), update.GetUpdate())
-
+	mongoTemplate := Db.Init("mongodb://root:admin@10.5.17.107:27017/?authMechanism=SCRAM-SHA-1&directConnection=true", "nezha_core", "users.settings")
+	/*userSetting := UserSetting{
+		App:       "nezha_core",
+		UpdatedAt: time.Now(),
+		CreatedAt: time.Now(),
+	}*/
+	//mongoTemplate.InsertOne(ctx, userSetting)
+	mongoTemplate.DeleteOne(ctx, Db.Where("app", "nezha_core").GetCriteria())
 }
