@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Mongo/Db"
+	"github.com/CFCEN/Mongo/Db"
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
